@@ -10,4 +10,10 @@ route.post("/login", controller.loginPost);
 
 route.get("/get-info", authenticateToken, controller.getInfoUser);
 
+route.post("/password/forgot", controller.forgotPassword);
+
+route.post("/password/otp", controller.otpPassword);
+
+route.post("/password/reset", authenticateToken, controller.resetPassword);
+
 module.exports = route;
