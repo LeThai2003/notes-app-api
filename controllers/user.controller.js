@@ -3,6 +3,7 @@ const { sendMail } = require("../helpers/send-mail.helper");
 const ForgotPassword = require("../models/forgot-password.model");
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 // [POST] users/create-account
 module.exports.createAccountPost = async (req, res) => {
@@ -41,13 +42,15 @@ module.exports.createAccountPost = async (req, res) => {
     
         await user.save();
     
-        delete user.password;
+        const record_user = user.toObject();
+
+        delete record_user.password;
     
         const accessToken = jwt.sign({user}, process.env.SECRET_TOKEN, {expiresIn: "36000m"});
     
         return res.json({
             error: false,
-            user,
+            user: record_user,
             accessToken,
             message: "Tạo tài khoản thành công"
         })
@@ -205,7 +208,10 @@ module.exports.resetPassword = async (req, res) => {
             {
                 return res.json({error: true, message: "Token không hợp lệ"});
             }
-            await User.updateOne({email: email}, {password: newPassword});
+            const hashPassword = await bcrypt.hash(newPassword, 10)
+
+            await User.updateOne({email: email}, {password: hashPassword});
+
             return res.json({error: false, message: "Tạo mới mật khẩu thành công."})
         } catch (error) {
             return res.status(401).json({error: true, message: "Token không hợp lệ hoặc hết hạn"});
