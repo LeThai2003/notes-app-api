@@ -46,7 +46,7 @@ module.exports.createAccountPost = async (req, res) => {
 
         delete record_user.password;
     
-        const accessToken = jwt.sign({user}, process.env.SECRET_TOKEN, {expiresIn: "36000m"});
+        const accessToken = jwt.sign({user: record_user}, process.env.SECRET_TOKEN, {expiresIn: "36000m"});
     
         return res.json({
             error: false,
@@ -91,9 +91,10 @@ module.exports.loginPost = async (req, res) => {
             })
         }
 
-        delete userInfo.password;
-        const user = {user: userInfo};
-        const accessToken = jwt.sign(user, process.env.SECRET_TOKEN, {expiresIn: "36000m"});
+        const user = userInfo.toObject();
+        delete user.password; 
+
+        const accessToken = jwt.sign({user}, process.env.SECRET_TOKEN, {expiresIn: "36000m"});
 
         return res.json({
             error: false,
