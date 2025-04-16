@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 // [POST] users/create-account
 module.exports.createAccountPost = async (req, res) => {
     
-    const {name, email, password} = req.body;
+    const {name, email, password, profileImageUrl} = req.body;
 
     try {
         if(!name)
@@ -35,7 +35,8 @@ module.exports.createAccountPost = async (req, res) => {
         const user = new User({
             fullName: name,
             email: email,
-            password: password
+            password: password,
+            profileImageUrl
         });
     
         await user.save();
@@ -79,26 +80,24 @@ module.exports.loginPost = async (req, res) => {
             return res.status(400).json({error: true, message: "Không tìm thấy tài khoản"});
         }
 
-        if(userInfo.email == email && userInfo.password == password)
-        {
-            delete userInfo.password;
-            const user = {user: userInfo};
-            const accessToken = jwt.sign(user, process.env.SECRET_TOKEN, {expiresIn: "36000m"});
-
-            return res.json({
-                error: false,
-                email,
-                accessToken,
-                message: "Đăng nhập thành công"
-            })
-        }
-        else
+        if(!(await userInfo.comparePassword(password)))
         {
             return res.status(400).json({
                 error: true,
                 message: "Mật khẩu sai"
             })
         }
+
+        delete userInfo.password;
+        const user = {user: userInfo};
+        const accessToken = jwt.sign(user, process.env.SECRET_TOKEN, {expiresIn: "36000m"});
+
+        return res.json({
+            error: false,
+            email,
+            accessToken,
+            message: "Đăng nhập thành công"
+        })
         
     } catch (error) {
         return res.status(500).json({error: true, message: "Lỗi hệ thống" + error.message});
@@ -122,6 +121,18 @@ module.exports.getInfoUser = async (req, res) => {
         return res.status(500).json({error: true, message: "Lỗi hệ thống" + error.message});
     }
 }
+
+
+// upload image
+module.exports.uploadImage = (req, res) => {
+    if(!req.file)
+    {
+        return res.status(400).json({message: "No file upload"});
+    }
+    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    res.status(200).json({imageUrl});
+}
+
 
 // [POST] /users/password/forgot
 module.exports.forgotPassword = async (req, res) => {

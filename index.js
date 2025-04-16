@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const route = require("./routes/index.route");
+const path = require("path");
 
 // console.log(require('crypto').randomBytes(64).toString('hex'));
 
@@ -25,6 +26,9 @@ app.use(
 )
 
 route(app);
+
+// uploads folder
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.listen(port, () => {
     console.log("Đang chạy trên cổng: " + port);
