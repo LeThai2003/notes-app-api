@@ -30,6 +30,8 @@ route(app);
 // uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.listen(port, () => {
-    console.log("Đang chạy trên cổng: " + port);
-})
+// app.listen(port, () => {
+//     console.log("Đang chạy trên cổng: " + port);
+// })
+
+module.exports = app;
