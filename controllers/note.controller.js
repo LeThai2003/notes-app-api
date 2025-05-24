@@ -23,11 +23,11 @@ module.exports.addNotePost = async (req, res) => {
             userId: user._id
         })
 
-        await note.save();
+        const saveNote = await note.save();
 
         return res.json({
             error: false,
-            note,
+            note: saveNote,
             message: "Tạo ghi chú thành công"
         })
     } catch (error) {
